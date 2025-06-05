@@ -10,6 +10,7 @@ import (
 	"slices"
 )
 
+// simple
 func copyToClipboard(text string) error {
 	cmd := exec.Command("wl-copy")
 	in, err := cmd.StdinPipe()
