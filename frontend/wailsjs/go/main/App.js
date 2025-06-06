@@ -5,3 +5,11 @@
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }
+
+export function PMList(arg1) {
+  return window['go']['main']['App']['PMList'](arg1);
+}
+
+export function ProcessFiles(arg1) {
+  return window['go']['main']['App']['ProcessFiles'](arg1);
+}

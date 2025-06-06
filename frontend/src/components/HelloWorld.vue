@@ -1,10 +1,19 @@
 <script setup>
 import {reactive} from 'vue'
-import {Greet} from '../../wailsjs/go/main/App'
+import {Greet, PMList, ProcessFiles} from '../../wailsjs/go/main/App'
 
 const data = reactive({
   name: "",
   resultText: "Select or drag file below 👇",
+  epp: "",
+  filed: "",
+})
+
+const fdata = reactive({
+    name: "",
+    size: "",
+    type: "",
+    data: [],
 })
 
 function greet() {
@@ -13,14 +22,36 @@ function greet() {
   })
 }
 
+
+function mcupdate(event) {
+
+    const fileInput = document.getElementById('pmfile');
+    const files = event.target.files[0];
+    const reader = new FileReader();
+    reader.readAsText(files);
+    reader.onload = () => {
+        data.epp = reader.result;
+        fdata.name = files.name;
+        fdata.size = files.size;
+        fdata.type = files.type;
+        fdata.data = reader.result;
+      PMList(fdata).then(result => {
+        data.resultText = "Go got the file"
+        data.epp = result;
+    })
+    };
+}
+
 </script>
 
 <template>
   <main>
     <div id="result" class="result">{{ data.resultText }}</div>
     <div id="input" class="input-box">
+      <input id="pmfile" class="input" type="file" @input="mcupdate"/>
             <br>
-      <input id="pmfile" class="input" type="file"/>
+            <button @click="mcupdate">I just couldn't do it!</button>
+      <div id="result2" class="result">{{ data.epp }}</div>
     </div>
   </main>
 </template>
