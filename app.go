@@ -26,11 +26,6 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
-}
-
 func copyToClipboard(text string) error {
 	cmd := exec.Command("wl-copy")
 	in, err := cmd.StdinPipe()
@@ -60,22 +55,11 @@ type CSVData struct {
 	Data []byte `json:"data"`
 }
 
-func (a *App) ProcessFiles(files []string) {
-	for _, file := range files {
-		fmt.Println("File:", file)
-	}
-}
-
 // This be the function to read the mcjiggy
 func (a *App) PMList(data FileInput) string {
 
-	//	fileLoc := "/home/treeskin/Downloads/jobs-2025-06-06.csv"
 	exceptions := []string{"Closed", "Cancelled"}
 
-	//	csvFile, err := os.Open(fileLoc)
-	//	if err != nil {
-	//		log.Fatal(err)
-	//	}
 	reader := csv.NewReader(strings.NewReader(string(data.Data)))
 
 	var job []string
@@ -84,8 +68,6 @@ func (a *App) PMList(data FileInput) string {
 
 	for {
 		line, error := reader.Read()
-		fmt.Println("Am I doing the loop?")
-		fmt.Println("=================")
 		if error == io.EOF {
 			break
 		} else if error != nil {
@@ -97,13 +79,11 @@ func (a *App) PMList(data FileInput) string {
 				jobs += string(line[1])
 				jobs += " "
 			}
-			fmt.Println(line[5])
 		}
 		if count == 0 {
 			count = 1
 		}
 
-		fmt.Println("=================")
 	}
 
 	error := copyToClipboard(jobs)
@@ -113,5 +93,5 @@ func (a *App) PMList(data FileInput) string {
 	}
 
 	fmt.Println("Text Copied to Clipboard!")
-	return fmt.Sprintf("It has been done.")
+	return fmt.Sprintf("Text Copied to Clipboard!")
 }
