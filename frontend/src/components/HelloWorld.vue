@@ -1,12 +1,15 @@
 <script setup>
-import {reactive} from 'vue'
-import {PMList} from '../../wailsjs/go/main/App'
+import {reactive, onMounted, onUnmounted} from 'vue'
+import {PMList, PMDrop} from '../../wailsjs/go/main/App'
+import {OnFileDrop, OnFileDropOff} from '../../wailsjs/runtime'
 
 const data = reactive({
   name: "",
   resultText: "Select or drag file below 👇",
   epp: [],
   filed: "",
+  path:"",
+  test:"",
 })
 
 const fdata = reactive({
@@ -16,12 +19,24 @@ const fdata = reactive({
     data: [],
 })
 
-function greet() {
-  Greet(data.name).then(result => {
-    data.resultText = result
-  })
-}
+// Set up file drop listener when component mounts
+onMounted(() => {
+  OnFileDrop((event, dataBuf, paths) => {
+    if (paths.length > 0) {
+      const path = paths[0]
+      data.test = path
+      data.path = {"Dropped": path};
+            PMDrop(data.path).then(result => {
+                data.epp = [result];
+            })
+    }
+  }, true)
+})
 
+// Clean up on unmount
+onUnmounted(() => {
+  OnFileDropOff()
+})
 
 function mcupdate(event) {
 
@@ -47,7 +62,8 @@ function mcupdate(event) {
 <template>
   <main>
     <div id="input" class="input-box">
-      <label id="pmlabel" class="input" for="pmfile">Select or Drag File</label>
+      <label id="pmlabel" class="input"
+                for="pmfile">Select or Drag File Here</label>
       <input id="pmfile" class="input" type="file" hidden @input="mcupdate"/>
       <div id="result2" class="result" v-for='dat in data.epp'>{{ dat }}</div>
     </div>
@@ -58,12 +74,12 @@ function mcupdate(event) {
 @property --clr-1 {
     syntax: "<color>";
     inherits: true;
-    initial-value:  #fc036f;
+    initial-value: #242424;
 }
 @property --clr-2 {
     syntax: "<color>";
     inherits: true;
-    initial-value:  transparent;
+    initial-value: #fc036f;
 }
 #input {
     margin: 10px auto;
@@ -75,13 +91,14 @@ function mcupdate(event) {
 }
 #pmlabel {
     --gradient-glow: var(--clr-1), var(--clr-2),var(--clr-1),var(--clr-2),var(--clr-1);
+    --wails-drop-target: drop;
     margin: 10px;
     color: #e8cc97;
     font-weight: bold;
-    background-color: #242424;
+    background-color: var(--surface);
     padding: 40px;
     border-radius: 10px;
-    border: 3px solid transparent;
+    border: 3px dashed #fc036f;
     background:
         linear-gradient(#242424 0 0) padding-box,
         conic-gradient(var(--gradient-glow)) border-box;
@@ -107,15 +124,15 @@ function mcupdate(event) {
 
 #pmlabel::after {
     z-index: -1;
-    background: #242424;
+    background: var(--surface);
     inset: 0.2rem;
     filter: blur(1rem);
 }
 
 @keyframes glow {
     50% {
-    --clr-1: transparent;
-    --clr-2: #fc036f;
+    --clr-1: #fc036f;
+    --clr-2: #242424;
 }
 }
 

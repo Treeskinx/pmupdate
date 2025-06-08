@@ -1,5 +1,17 @@
 export namespace main {
 	
+	export class CSVData {
+	    Dropped: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CSVData(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Dropped = source["Dropped"];
+	    }
+	}
 	export class FileInput {
 	    name: string;
 	    size: number;

@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"slices"
 	"strings"
@@ -52,7 +53,51 @@ type FileInput struct {
 }
 
 type CSVData struct {
-	Data []byte `json:"data"`
+	Path string `json:"Dropped"`
+}
+
+func (a *App) PMDrop(data CSVData) string {
+
+	exceptions := []string{"Closed", "Cancelled"}
+
+	file, err := os.Open(data.Path)
+	if err != nil {
+		return "Couldn't read the file"
+	}
+	reader := csv.NewReader(file)
+
+	var job []string
+	var jobs string
+	count := 0
+
+	for {
+		line, error := reader.Read()
+		if error == io.EOF {
+			break
+		} else if error != nil {
+			fmt.Println(error)
+		}
+		if count == 1 {
+			if !slices.Contains(exceptions, string(line[5])) {
+				job = append(job, string(line[1]))
+				jobs += string(line[1])
+				jobs += " "
+			}
+		}
+		if count == 0 {
+			count = 1
+		}
+
+	}
+
+	error := copyToClipboard(jobs)
+	if error != nil {
+		fmt.Println("Error copying to clipboard:", error)
+		return "Couldn't copy to clipboard"
+	}
+
+	fmt.Println("Text Copied to Clipboard!")
+	return fmt.Sprintf("Text Copied to Clipboard!")
 }
 
 // This be the function to read the mcjiggy
