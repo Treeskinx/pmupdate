@@ -1,38 +1,34 @@
 <script setup>
 import {reactive, onMounted, onUnmounted, ref} from 'vue'
-import {PMList, PMDrop} from '../../wailsjs/go/main/App'
+import {PMList, PMDrop, PMCreate} from '../../wailsjs/go/main/App'
 import {OnFileDrop, OnFileDropOff} from '../../wailsjs/runtime'
 
 // Set CSS Colors
 const textColor = ref('#e8cc97');
 const secondaryColor = ref('#fc036f');
 
-const data = reactive({
+const pmCreate = reactive({
   name: "",
   resultText: "Select or drag file below 👇",
   epp: [],
   filed: "",
   path:"",
   test:"",
+  paths: [],
 })
 
-const fdata = reactive({
-    name: "",
-    size: "",
-    type: "",
-    data: [],
-})
+// Set up dropzone ref points
+const dropZone1 = ref(null);
+const dropZone2 = ref(null);
 
 // Set up file drop listener when component mounts
 onMounted(() => {
   OnFileDrop((event, dataBuf, paths) => {
     if (paths.length > 0) {
       const path = paths[0]
-      data.test = path
-      data.path = {"Dropped": path};
-            PMDrop(data.path).then(result => {
-                data.epp = [result];
-            })
+      pmCreate.test = path
+      pmCreate.path = {"Dropped": paths};
+      pmCreate.paths.push(...paths);
     }
   }, true)
 })
@@ -42,42 +38,61 @@ onUnmounted(() => {
   OnFileDropOff()
 })
 
-function mcupdate(event) {
-
-    const fileInput = document.getElementById('pmfile');
-    const files = event.target.files[0];
-    const reader = new FileReader();
-    reader.readAsText(files);
-    reader.onload = () => {
-        data.epp = reader.result;
-        fdata.name = files.name;
-        fdata.size = files.size;
-        fdata.type = files.type;
-        fdata.data = reader.result;
-      PMList(fdata).then(result => {
-        data.resultText = "Go got the file"
-        data.epp = [result];
+function CreatePM() {
+    PMCreate(pmCreate.path).then(result => {
+        pmCreate.epp = [result];
     })
-    };
+}
+
+function ClearPaths() {
+    pmCreate.paths.splice(0, pmCreate.paths.length);
 }
 
 </script>
 
 <template>
-  <main>
-    <h1>Update PM List:</h1>
-    <div id="input" class="input-box">
-      <label id="pmlabel" class="input"
-                for="pmfile">Select or Drag File Here</label>
-      <input id="pmfile" class="input" type="file" hidden @input="mcupdate"/>
-      <div id="result2" class="result" v-for='dat in data.epp'>{{ dat }}</div>
-    </div>
-  </main>
+    <main>
+        <h1 id="title">Create PM List:</h1>
+        <div id="input" class="input-box">
+            <div ref="dropZone1" class="dropz">
+                <div id="dzReady">Drop Files Here!</div>
+                <div class="" v-for='file in pmCreate.paths'>{{ file }}</div>
+            </div>
+        </div>
+        <div class="button" id="submitButton" @click="CreatePM">Submit</div>
+        <div class="button" id="clearButton" @click="ClearPaths">Clear Files</div>
+        <div id="result2" class="result" v-for='dat in pmCreate.epp'>{{ dat }}</div>
+    </main>
 </template>
 
 <style scoped>
-h1 {
+#title {
     color: v-bind(textColor);
+}
+.dropz .wails-drop-target-active {
+    z-index: 999;
+    box-shadow: 0px 10px black;
+}
+.button {
+    justify-self: center;
+    width: 470px;
+    height: 40px;
+    text-align: center;
+    align-content: center;
+    margin: auto auto;
+    margin-bottom: 10px;
+    border: 4px solid v-bind(textColor);
+    border-radius: 4px;
+    color: v-bind(textColor);
+    font-size: 22px;
+    font-weight: bold;
+}
+.button:hover {
+    cursor: pointer;
+    color: v-bind(secondaryColor);
+    border-color: v-bind(secondaryColor);
+    box-shadow: 0px 10px #141414;
+    transition: 0.3s ease-in-out;
 }
 @property --clr-1 {
     syntax: "<color>";
@@ -93,21 +108,21 @@ h1 {
     margin: 10px auto;
     display: flex;
     flex-direction: column;
-    width: 500px;
+    width: 600px;
     justify-items: center;
 
 }
-#pmlabel {
+.dropz {
     --gradient-glow: var(--clr-1), var(--clr-2),var(--clr-1),var(--clr-2),var(--clr-1);
     --wails-drop-target: drop;
     margin: 10px;
-    color: #e8cc97;
-    font-weight: bold;
-    background-color: var(--surface);
+    color: v-bind(textColor);
     height: 100px;
-    align-content: center;
     font-weight: bold;
+    text-align: center;
+    align-content: center;
     font-size: 20px;
+    background-color: var(--surface);
     padding: 40px;
     border-radius: 10px;
     border: 3px dashed #fc036f;
@@ -119,13 +134,13 @@ h1 {
     animation: glow 5s infinite ease-in-out;
 }
 
-#pmlabel::before, #pmlabel::after {
+.dropz::before, .dropz::after {
    content: '';
     position: absolute;
     border-radius: inherit;
 }
 
-#pmlabel::before {
+.dropz::before {
     z-index: -2;
     background:
         conic-gradient(var(--gradient-glow)) border-box;
@@ -134,7 +149,7 @@ h1 {
     filter: blur(1rem);
 }
 
-#pmlabel::after {
+.dropz::after {
     z-index: -1;
     background: var(--surface);
     inset: 0.2rem;
@@ -148,11 +163,8 @@ h1 {
 }
 }
 
-#pmlabel:hover {
-    cursor: pointer;
-}
 .result {
-  color: #e8cc97;
+  color: v-bind(textColor);
   font-weight: bold;
   height: 20px;
   line-height: 20px;

@@ -1,10 +1,34 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'</script>
+import {ref} from 'vue'
+import HelloWorld from './components/HelloWorld.vue'
+import PMListCreate from './components/PMListCreate.vue'
+
+// Set CSS Colors
+const textColor = ref('#e8cc97');
+const secondaryColor = ref('#fc036f');
+
+function ShowCreate() {
+    document.getElementById("PMListCreatePage").style.display = "block";
+    document.getElementById("PMUpdatePage").style.display = "none";
+}
+function ShowUpdate() {
+    document.getElementById("PMListCreatePage").style.display = "none";
+    document.getElementById("PMUpdatePage").style.display = "block";
+}
+</script>
 
 <template>
     <div id="main">
-  <img id="logo" alt="Wails logo" src="./assets/images/hotfuzz.webp"/>
-  <HelloWorld/>
+        <div id="nav">
+            <div class="pageButton" @click="ShowCreate">Create PM List</div>
+            <div class="pageButton" @click="ShowUpdate">Update PM List</div>
+        </div>
+        <div id="PMListCreatePage">
+            <PMListCreate/>
+        </div>
+        <div id="PMUpdatePage">
+            <HelloWorld/>
+        </div>
     </div>
 </template>
 
@@ -16,13 +40,38 @@ import HelloWorld from './components/HelloWorld.vue'</script>
     align-content: center;
     
 }
-#logo {
-  width: 500px;
-  height: 300px;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  background-origin: content-box;
-  border-radius: 20px;
+#PMListCreatePage {
+    display: none;
+}
+
+#nav {
+    margin-left: auto;
+    margin-right: auto;
+    justify-self: center;
+    margin-bottom: 20px;
+    width: 400px;
+    display: flex;
+    flex-direction: row;
+}
+.pageButton {
+    justify-self: center;
+    width: 50%;
+    height: 40px;
+    text-align: center;
+    align-content: center;
+    margin-bottom: 10px;
+    margin: 0px 10px;
+    border: 4px solid v-bind(textColor);
+    border-radius: 4px;
+    color: v-bind(textColor);
+    font-size: 22px;
+    font-weight: bold;
+}
+.pageButton:hover {
+    cursor: pointer;
+    color: v-bind(secondaryColor);
+    border-color: v-bind(secondaryColor);
+    box-shadow: 0px 10px #141414;
+    transition: 0.3s ease-in-out;
 }
 </style>
